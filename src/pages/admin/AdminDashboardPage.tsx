@@ -394,8 +394,8 @@ export function AdminDashboardPage({ onSessionEnded }: AdminDashboardPageProps) 
             <BrandIcon />
           </span>
           <span>
-            <strong>Portail Medical</strong>
-            <small>Gestion des patients</small>
+            <strong>gestion des patients</strong>
+            <small>Portail medical</small>
           </span>
         </header>
 

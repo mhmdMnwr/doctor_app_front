@@ -31,8 +31,8 @@ export function AuthPage({ infoMessage, onAuthenticated }: AuthPageProps) {
         <div className="auth-logo">
           <MedicalLogo />
         </div>
-        <h1>Portail Médical</h1>
-        <p>Système de Gestion des Patients</p>
+        <h1>gestion des patients</h1>
+        <p>Portail medical</p>
       </header>
 
       {infoMessage && <p className="status status--info">{infoMessage}</p>}

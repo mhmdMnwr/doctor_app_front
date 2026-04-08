@@ -369,7 +369,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 10px;
-  font: 700 1.03rem/1 var(--font-body);
+  font: 700 1.12rem/1 var(--font-body);
   cursor: pointer;
   text-align: left;
   transition: background-color 0.2s, color 0.2s;

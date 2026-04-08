@@ -10,9 +10,17 @@ const readToken = (key: string): string | null => {
 }
 
 export const tokenStorage = {
+  getAccessToken(): string | null {
+    return readToken(STORAGE_KEYS.ACCESS_TOKEN)
+  },
+
+  getRefreshToken(): string | null {
+    return readToken(STORAGE_KEYS.REFRESH_TOKEN)
+  },
+
   getTokens(): TokenPair | null {
-    const accessToken = readToken(STORAGE_KEYS.ACCESS_TOKEN)
-    const refreshToken = readToken(STORAGE_KEYS.REFRESH_TOKEN)
+    const accessToken = this.getAccessToken()
+    const refreshToken = this.getRefreshToken()
 
     if (!accessToken || !refreshToken) {
       return null
@@ -33,5 +41,9 @@ export const tokenStorage = {
 
   hasTokens(): boolean {
     return this.getTokens() !== null
+  },
+
+  hasRefreshToken(): boolean {
+    return this.getRefreshToken() !== null
   },
 }

@@ -3,17 +3,31 @@ import { useEffect, useState } from 'react'
 import { adminApi } from '../features/admin/api/adminApi'
 import { AuthPage } from '../pages/auth/AuthPage.tsx'
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage.tsx'
-import { SessionExpiredError } from '../shared/services/httpClient'
+import { SESSION_EXPIRED_EVENT, SessionExpiredError } from '../shared/services/httpClient'
 import { tokenStorage } from '../shared/services/tokenStorage'
 
 export function App() {
   const [isBootstrapping, setIsBootstrapping] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(tokenStorage.hasTokens())
+  const [isAuthenticated, setIsAuthenticated] = useState(tokenStorage.hasRefreshToken())
   const [noticeMessage, setNoticeMessage] = useState<string | null>(null)
 
   useEffect(() => {
+    const handleSessionExpired = (event: Event) => {
+      const sessionEvent = event as CustomEvent<{ message?: string }>
+      setNoticeMessage(sessionEvent.detail?.message || 'Votre session a expire. Veuillez vous reconnecter.')
+      setIsAuthenticated(false)
+    }
+
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired as EventListener)
+
+    return () => {
+      window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired as EventListener)
+    }
+  }, [])
+
+  useEffect(() => {
     const validateStoredSession = async () => {
-      if (!tokenStorage.hasTokens()) {
+      if (!tokenStorage.hasRefreshToken()) {
         setIsBootstrapping(false)
         return
       }

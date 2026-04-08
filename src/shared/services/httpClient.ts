@@ -7,6 +7,10 @@ interface RefreshTokenResponse {
   refreshToken: string
 }
 
+interface SessionExpiredEventDetail {
+  message: string
+}
+
 export class ApiError extends Error {
   readonly status: number
   readonly details?: unknown
@@ -25,6 +29,8 @@ export class SessionExpiredError extends Error {
     this.name = 'SessionExpiredError'
   }
 }
+
+export const SESSION_EXPIRED_EVENT = 'doctor-app:session-expired'
 
 class HttpClient {
   private readonly baseUrl: string
@@ -76,6 +82,10 @@ class HttpClient {
   }
 
   async request<TResponse, TBody>(options: RequestOptions<TBody>): Promise<TResponse> {
+    if (options.requiresAuth && options.retryOnUnauthorized !== false) {
+      await this.ensureAccessTokenOrThrow()
+    }
+
     const response = await this.send(options)
 
     if (this.shouldRefreshTokens(response, options)) {
@@ -87,14 +97,25 @@ class HttpClient {
       })
 
       if (retryResponse.status === HTTP_STATUS.UNAUTHORIZED) {
-        tokenStorage.clearTokens()
-        throw new SessionExpiredError()
+        this.expireSession()
       }
 
       return this.parseResponse<TResponse>(retryResponse)
     }
 
     return this.parseResponse<TResponse>(response)
+  }
+
+  private async ensureAccessTokenOrThrow(): Promise<void> {
+    if (tokenStorage.getAccessToken()) {
+      return
+    }
+
+    if (!tokenStorage.getRefreshToken()) {
+      this.expireSession()
+    }
+
+    await this.refreshTokensOrThrow()
   }
 
   private shouldRefreshTokens<TBody>(response: Response, options: RequestOptions<TBody>): boolean {
@@ -106,27 +127,29 @@ class HttpClient {
   }
 
   private async refreshTokensOrThrow(): Promise<void> {
-    const tokens = tokenStorage.getTokens()
+    const refreshToken = tokenStorage.getRefreshToken()
 
-    if (!tokens?.refreshToken) {
-      tokenStorage.clearTokens()
-      throw new SessionExpiredError()
+    if (!refreshToken) {
+      this.expireSession()
     }
 
     const refreshResponse = await this.send({
       method: 'POST',
       path: API_ROUTES.AUTH.REFRESH,
-      body: { refreshToken: tokens.refreshToken },
+      body: { refreshToken },
       requiresAuth: false,
       retryOnUnauthorized: false,
     })
 
     if (!refreshResponse.ok) {
-      tokenStorage.clearTokens()
-      throw new SessionExpiredError()
+      this.expireSession()
     }
 
     const payload = await this.parseResponse<RefreshTokenResponse>(refreshResponse)
+
+    if (!payload.accessToken || !payload.refreshToken) {
+      this.expireSession()
+    }
 
     tokenStorage.saveTokens({
       accessToken: payload.accessToken,
@@ -142,10 +165,10 @@ class HttpClient {
     }
 
     if (options.requiresAuth) {
-      const accessToken = tokenStorage.getTokens()?.accessToken
+      const accessToken = tokenStorage.getAccessToken()
 
       if (!accessToken) {
-        throw new SessionExpiredError()
+        this.expireSession()
       }
 
       headers.set('Authorization', `Bearer ${accessToken}`)
@@ -198,6 +221,20 @@ class HttpClient {
   private toAbsoluteUrl(path: string): string {
     const normalizedPath = path.startsWith('/') ? path : `/${path}`
     return `${this.baseUrl}${normalizedPath}`
+  }
+
+  private expireSession(message = 'Votre session a expire. Veuillez vous reconnecter.'): never {
+    tokenStorage.clearTokens()
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent<SessionExpiredEventDetail>(SESSION_EXPIRED_EVENT, {
+          detail: { message },
+        }),
+      )
+    }
+
+    throw new SessionExpiredError(message)
   }
 }
 

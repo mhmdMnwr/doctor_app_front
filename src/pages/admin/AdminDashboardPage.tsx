@@ -2,9 +2,14 @@ import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 
 import { adminApi } from '../../features/admin/api/adminApi'
-import type { AdminProfile, UpdateAdminProfileRequest } from '../../features/admin/types/admin.types'
+import type {
+  AdminProfile,
+  DoctorAccountInfo,
+  UpdateAdminProfileRequest,
+} from '../../features/admin/types/admin.types'
 import { AnalysesSection } from '../../features/analyses/components/AnalysesSection.tsx'
 import { authApi } from '../../features/auth/api/authApi'
+import { ChatbotSection } from '../../features/chatbot/components/ChatbotSection'
 import { CertificatsSection } from '../../features/certificats/components/CertificatsSection'
 import { ExcelExportSection } from '../../features/excel/components/ExcelExportSection'
 import { OrdonnancesSection } from '../../features/ordonnances/components/OrdonnancesSection'
@@ -15,7 +20,14 @@ import { SessionExpiredError } from '../../shared/services/httpClient'
 import type { DoctorPrintInfo } from '../../shared/utils/medicalPrint'
 import { getErrorMessage } from '../../shared/utils/error'
 
-type PortalSection = 'patients' | 'ordonnances' | 'certificats' | 'analyses' | 'excel' | 'settings'
+type PortalSection =
+  | 'patients'
+  | 'ordonnances'
+  | 'certificats'
+  | 'analyses'
+  | 'chatbot'
+  | 'excel'
+  | 'settings'
 
 interface PortalNavItem {
   key: PortalSection
@@ -57,6 +69,7 @@ const NAV_ITEMS: PortalNavItem[] = [
   { key: 'ordonnances', label: 'Ordonnances', icon: PrescriptionIcon },
   { key: 'certificats', label: 'Certificats', icon: CalendarIcon },
   { key: 'analyses', label: 'Analyses', icon: FlaskIcon },
+  { key: 'chatbot', label: 'Chatbot', icon: ChatbotIcon },
   { key: 'excel', label: 'Excel', icon: SheetIcon },
   { key: 'settings', label: 'Parametres', icon: GearIcon, isBottom: true },
 ]
@@ -65,6 +78,12 @@ const toProfileFormValues = (profile: AdminProfile): ProfileFormValues => ({
   username: profile.username || '',
   phoneNumber: profile.phoneNumber || '',
   address: profile.address || '',
+})
+
+const toDoctorPrintInfo = (doctor: DoctorAccountInfo): DoctorPrintInfo => ({
+  name: doctor.name || '',
+  phoneNumber: doctor.phoneNumber || '',
+  address: doctor.address || '',
 })
 
 const toProfilePayload = (
@@ -105,6 +124,19 @@ export function AdminDashboardPage({ onSessionEnded }: AdminDashboardPageProps) 
   const [passwordFormValues, setPasswordFormValues] = useState<PasswordFormValues>(EMPTY_PASSWORD_FORM)
   const [passwordErrorMessage, setPasswordErrorMessage] = useState<string | null>(null)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [doctorPrintInfo, setDoctorPrintInfo] = useState<DoctorPrintInfo | null>(null)
+
+  const loadDoctorPrintInfo = useCallback(async () => {
+    try {
+      const response = await adminApi.getDoctorName()
+      setDoctorPrintInfo(toDoctorPrintInfo(response))
+    } catch (error) {
+      if (error instanceof SessionExpiredError) {
+        onSessionEnded(error.message)
+        return
+      }
+    }
+  }, [onSessionEnded])
 
   const loadProfile = useCallback(async () => {
     setIsLoadingProfile(true)
@@ -129,6 +161,10 @@ export function AdminDashboardPage({ onSessionEnded }: AdminDashboardPageProps) 
   useEffect(() => {
     void loadProfile()
   }, [loadProfile])
+
+  useEffect(() => {
+    void loadDoctorPrintInfo()
+  }, [loadDoctorPrintInfo])
 
   const handleSectionChange = (section: PortalSection) => {
     setActiveSection(section)
@@ -192,6 +228,7 @@ export function AdminDashboardPage({ onSessionEnded }: AdminDashboardPageProps) 
       setProfile(response.data)
       setProfileFormValues(toProfileFormValues(response.data))
       setProfileSuccessMessage('Profil mis a jour avec succes.')
+      void loadDoctorPrintInfo()
     } catch (error) {
       if (error instanceof SessionExpiredError) {
         onSessionEnded(error.message)
@@ -336,14 +373,6 @@ export function AdminDashboardPage({ onSessionEnded }: AdminDashboardPageProps) 
     return <ExcelExportSection />
   }
 
-  const doctorPrintInfo: DoctorPrintInfo | null = profile
-    ? {
-        name: profile.username,
-        phoneNumber: profile.phoneNumber,
-        address: profile.address,
-      }
-    : null
-
   const renderActiveSection = () => {
     if (isPatientRecordsPageOpen && selectedPatient) {
       return (
@@ -375,6 +404,10 @@ export function AdminDashboardPage({ onSessionEnded }: AdminDashboardPageProps) 
 
     if (activeSection === 'analyses') {
       return <AnalysesSection doctorInfo={doctorPrintInfo} />
+    }
+
+    if (activeSection === 'chatbot') {
+      return <ChatbotSection />
     }
 
     if (activeSection === 'settings') {
@@ -442,7 +475,9 @@ export function AdminDashboardPage({ onSessionEnded }: AdminDashboardPageProps) 
         <MenuIcon />
       </button>
 
-      <section className="portal-content">{renderActiveSection()}</section>
+      <section className={`portal-content ${activeSection === 'chatbot' ? 'portal-content--chat' : ''}`}>
+        {renderActiveSection()}
+      </section>
 
       {isPasswordModalOpen && (
         <div className="modal-overlay" onClick={closePasswordModal} role="presentation">
@@ -578,6 +613,17 @@ function SheetIcon() {
     <svg aria-hidden="true" viewBox="0 0 24 24">
       <path
         d="M7 3h8l4 4v14H7Zm8 2.5V8h2.5ZM9 11h8v2H9Zm0 4h8v2H9Zm0-8h4v2H9Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
+function ChatbotIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path
+        d="M11 2h2v2h3a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4h-1.2l-1.5 3h-2.6l-1.5-3H8a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4h3Zm5 8a1.25 1.25 0 1 0-1.25-1.25A1.25 1.25 0 0 0 16 10Zm-8 0a1.25 1.25 0 1 0-1.25-1.25A1.25 1.25 0 0 0 8 10Zm1 4h6v-2H9Z"
         fill="currentColor"
       />
     </svg>

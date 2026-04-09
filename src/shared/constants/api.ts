@@ -12,6 +12,7 @@ export const API_ROUTES = {
   },
   ADMIN: {
     ME: '/admin/me',
+    DOCTOR_NAME: '/admin/doctor-name',
   },
   PATIENTS: {
     BASE: '/patients',
@@ -27,6 +28,9 @@ export const API_ROUTES = {
   ANALYZES: {
     BASE: '/analyzes',
     BY_DATE: '/analyzes/by-date',
+  },
+  CHATBOT: {
+    MESSAGE: '/chatbot/message',
   },
 } as const
 

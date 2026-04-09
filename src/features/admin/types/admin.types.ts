@@ -18,3 +18,9 @@ export interface UpdateAdminProfileResponse {
   message: string
   data: AdminProfile
 }
+
+export interface DoctorAccountInfo {
+  name: string
+  address?: string
+  phoneNumber?: string
+}

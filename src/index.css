@@ -1,25 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=Sora:wght@500;600;700&display=swap');
 
 :root {
-  --bg: #eef2f7;
+  --bg: #f7f9fc;
   --card: #ffffff;
-  --text: #0f1f3f;
-  --muted: #5e6f88;
-  --line: #d6deea;
-  --brand: #1d63f0;
-  --brand-dark: #124bc4;
-  --action: #020b2d;
-  --action-hover: #0c1c4f;
-  --success-bg: #e9f7ef;
-  --success-text: #1f6a47;
-  --error-bg: #fdeef0;
-  --error-text: #912735;
-  --info-bg: #e8f1ff;
-  --info-text: #214780;
+  --text: #24334d;
+  --muted: #5d6d86;
+  --line: #dbe4ef;
+  --brand: #7594ca;
+  --brand-dark: #617fb7;
+  --action: #5f7eb7;
+  --action-hover: #4f6ea7;
+  --success-bg: #ecf7f1;
+  --success-text: #2f6a4f;
+  --error-bg: #faeff1;
+  --error-text: #8b3642;
+  --info-bg: #edf3fb;
+  --info-text: #35527d;
   --radius-lg: 16px;
   --radius-md: 10px;
   --radius-sm: 8px;
-  --shadow-card: 0 14px 24px rgba(19, 37, 73, 0.08);
+  --shadow-card: 0 10px 18px rgba(36, 51, 77, 0.08);
   --font-body: 'Nunito Sans', 'Segoe UI', sans-serif;
   --font-heading: 'Sora', 'Nunito Sans', sans-serif;
 }
@@ -31,6 +31,7 @@
 body {
   margin: 0;
   font-family: var(--font-body);
+  font-weight: 600;
   color: var(--text);
   background: var(--bg);
 }
@@ -44,13 +45,15 @@ h2 {
   margin: 0;
   color: var(--text);
   font-family: var(--font-heading);
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 p {
   margin: 0;
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--muted);
+  font-weight: 600;
 }
 
 button,
@@ -239,13 +242,13 @@ textarea {
 }
 
 .button--ghost {
-  border: 1px solid #c9d5ee;
-  background: #edf3ff;
-  color: #1b3d7a;
+  border: 1px solid #d1dae8;
+  background: #f2f5fa;
+  color: #3e577d;
 }
 
 .button--ghost:hover:not(:disabled) {
-  background: #e3ecff;
+  background: #e9eef6;
 }
 
 .button--danger {
@@ -293,7 +296,7 @@ textarea {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 256px 1fr;
-  background: #f2f5fa;
+  background: #f7f9fc;
 }
 
 .drawer-toggle,
@@ -381,13 +384,13 @@ textarea {
 }
 
 .portal-nav-item:hover {
-  background: #eff4ff;
-  color: #1c4ba5;
+  background: #f2f5fa;
+  color: #48618b;
 }
 
 .portal-nav-item.is-active {
-  background: #e8f0ff;
-  color: #1b54cc;
+  background: #ecf2fa;
+  color: #3c5888;
 }
 
 .portal-nav-item--logout {
@@ -402,6 +405,11 @@ textarea {
 .portal-content {
   padding: 30px 32px;
   overflow-x: hidden;
+}
+
+.portal-content--chat {
+  height: 100dvh;
+  overflow: hidden;
 }
 
 .portal-page__header {
@@ -520,6 +528,57 @@ textarea {
   cursor: pointer;
   box-shadow: 0 8px 16px rgba(17, 37, 71, 0.08);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.patient-card-row {
+  border: 1px solid #d9e3f1;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 16px rgba(17, 37, 71, 0.08);
+  padding: 6px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.patient-card-row:hover {
+  box-shadow: 0 12px 20px rgba(17, 37, 71, 0.12);
+  transform: translateY(-1px);
+}
+
+.patient-card-row .patient-card {
+  width: 100%;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 5px 6px;
+}
+
+.patient-card:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.patient-card-row .patient-card:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.patient-card-row__delete {
+  width: 44px;
+  height: 44px;
+}
+
+.patient-card-row__delete svg {
+  width: 18px;
+  height: 18px;
+}
+
+.patient-card-row.is-selected {
+  border-color: #89a7e6;
+  box-shadow: 0 0 0 2px rgba(137, 167, 230, 0.24);
 }
 
 .patient-card:hover {
@@ -699,9 +758,9 @@ textarea {
 }
 
 .records-tab {
-  border: 1px solid #d2def4;
-  background: #f3f7ff;
-  color: #1f3f7c;
+  border: 1px solid #d4deeb;
+  background: #f4f7fb;
+  color: #3e587f;
   border-radius: 10px;
   padding: 9px 12px;
   font-weight: 700;
@@ -709,8 +768,8 @@ textarea {
 }
 
 .records-tab.is-active {
-  background: #1f4ca8;
-  border-color: #1f4ca8;
+  background: var(--action);
+  border-color: var(--action);
   color: #ffffff;
 }
 
@@ -1027,10 +1086,109 @@ textarea {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
+.chat-simple {
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+  grid-template-rows: minmax(0, 1fr) auto;
+  overflow: hidden;
+}
+
+.chat-simple__thread {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f5f8fc;
+  padding: 12px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.chat-simple__empty {
+  color: #607699;
+  font-weight: 600;
+  margin: 0;
+}
+
+.chat-simple__bubble {
+  max-width: min(92%, 700px);
+  border-radius: 12px;
+  padding: 10px 12px;
+  box-shadow: 0 6px 12px rgba(14, 30, 59, 0.08);
+}
+
+.chat-simple__bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.chat-simple__bubble--user {
+  margin-left: auto;
+  background: var(--action);
+}
+
+.chat-simple__bubble--user p {
+  color: #ffffff;
+}
+
+.chat-simple__bubble--assistant {
+  margin-right: auto;
+  background: #ffffff;
+  border: 1px solid #d8e2f2;
+}
+
+.chat-simple__bubble--assistant p {
+  color: var(--text);
+}
+
+.chat-simple__bubble--loading {
+  opacity: 0.9;
+}
+
+.chat-simple__composer {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.chat-simple__input {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: #f3f5f9;
+  color: #2f4363;
+  padding: 10px 12px;
+  font-weight: 600;
+  min-height: 76px;
+  max-height: 180px;
+  overflow-y: auto;
+  resize: none;
+}
+
+.chat-simple__input:focus-visible {
+  outline: none;
+  border-color: #9db7eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(29, 99, 240, 0.13);
+}
+
+.chat-simple__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(3, 11, 31, 0.5);
+  background: rgba(36, 51, 77, 0.36);
   display: grid;
   place-items: center;
   padding: 16px;
@@ -1221,6 +1379,10 @@ textarea {
     padding: 68px 16px 20px;
   }
 
+  .portal-content--chat {
+    padding: 68px 16px 14px;
+  }
+
   .patients-layout {
     grid-template-columns: 1fr;
   }
@@ -1269,10 +1431,22 @@ textarea {
     width: 100%;
   }
 
+  .portal-content--chat {
+    padding: 68px 10px 10px;
+  }
+
   .settings-actions,
   .editor-actions,
   .modal-card__actions {
     justify-content: stretch;
+  }
+
+  .chat-simple__actions {
+    justify-content: stretch;
+  }
+
+  .chat-simple__actions .button {
+    width: 100%;
   }
 
   .pagination-row {

@@ -43,6 +43,7 @@ export function PatientsSection({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [createFormValues, setCreateFormValues] = useState<PatientFormValues>(EMPTY_FORM_VALUES)
   const [page, setPage] = useState<number>(PAGINATION.DEFAULT_PAGE)
+  const [deletingPatientId, setDeletingPatientId] = useState<string | null>(null)
 
   const loadPatients = async (nextPage = page) => {
     setIsLoading(true)
@@ -139,9 +140,45 @@ export function PatientsSection({
     }
   }
 
+  const handleDeletePatient = async (patient: Patient) => {
+    if (deletingPatientId || isCreating || isLoading) {
+      return
+    }
+
+    const patientName = getPatientDisplayName(patient)
+    const confirmed =
+      typeof window === 'undefined'
+        ? true
+        : window.confirm(`Supprimer ${patientName} ? Cette action est definitive.`)
+
+    if (!confirmed) {
+      return
+    }
+
+    setDeletingPatientId(patient._id)
+    setErrorMessage(null)
+    setSuccessMessage(null)
+
+    try {
+      await patientsApi.deletePatient(patient._id)
+      setSuccessMessage('Patient supprime avec succes.')
+
+      if (selectedPatientId === patient._id) {
+        onPatientSelected(null)
+      }
+
+      await loadPatients(page)
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error, 'La suppression du patient a echoue.'))
+    } finally {
+      setDeletingPatientId(null)
+    }
+  }
+
   const totalPatients = patientsResponse?.pagination.total ?? patients.length
   const currentPage = patientsResponse?.pagination.page ?? PAGINATION.DEFAULT_PAGE
   const totalPages = patientsResponse?.pagination.totalPages ?? PAGINATION.DEFAULT_PAGE
+  const isDeletingAnyPatient = deletingPatientId !== null
 
   return (
     <>
@@ -173,27 +210,51 @@ export function PatientsSection({
         </label>
 
         <div className="patient-list">
-          {filteredPatients.map((patient) => (
-            <button
-              className={`patient-card ${selectedPatientId === patient._id ? 'is-selected' : ''}`}
-              key={patient._id}
-              onClick={() => {
-                onPatientSelected(patient)
-                onOpenPatientRecords(patient)
-              }}
-              type="button"
-            >
-              <span className="patient-card__avatar">
-                <UserIcon />
-              </span>
-              <span className="patient-card__meta">
-                <strong>{getPatientDisplayName(patient)}</strong>
-                <small>
-                    {getPatientAgeLabel(patient.birthdate)} {patient.phoneNumber ? `- ${patient.phoneNumber}` : ''}
-                </small>
-              </span>
-            </button>
-          ))}
+          {filteredPatients.map((patient) => {
+            const isDeletingCurrentPatient = deletingPatientId === patient._id
+            const isSelected = selectedPatientId === patient._id
+
+            return (
+              <div className={`patient-card-row ${isSelected ? 'is-selected' : ''}`} key={patient._id}>
+                <button
+                  className="patient-card patient-card-row__open"
+                  disabled={isDeletingAnyPatient}
+                  onClick={() => {
+                    onPatientSelected(patient)
+                    onOpenPatientRecords(patient)
+                  }}
+                  type="button"
+                >
+                  <span className="patient-card__avatar">
+                    <UserIcon />
+                  </span>
+                  <span className="patient-card__meta">
+                    <strong>{getPatientDisplayName(patient)}</strong>
+                    <small>
+                      {getPatientAgeLabel(patient.birthdate)} {patient.phoneNumber ? `- ${patient.phoneNumber}` : ''}
+                    </small>
+                  </span>
+                </button>
+
+                <button
+                  aria-label={
+                    isDeletingCurrentPatient
+                      ? 'Suppression en cours'
+                      : `Supprimer ${getPatientDisplayName(patient)}`
+                  }
+                  className="record-item__icon-button record-item__icon-button--danger patient-card-row__delete"
+                  disabled={isDeletingAnyPatient}
+                  onClick={() => {
+                    void handleDeletePatient(patient)
+                  }}
+                  title={isDeletingCurrentPatient ? 'Suppression...' : 'Supprimer patient'}
+                  type="button"
+                >
+                  {isDeletingCurrentPatient ? <span aria-hidden="true">...</span> : <TrashIcon />}
+                </button>
+              </div>
+            )
+          })}
 
           {!filteredPatients.length && !isLoading && (
             <p className="muted-text">Aucun patient trouve pour cette recherche.</p>
@@ -316,6 +377,17 @@ function PlusIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24">
       <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6Z" fill="currentColor" />
+    </svg>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path
+        d="M9 3h6l1 2h4v2H4V5h4l1-2Zm1 6h2v9h-2V9Zm4 0h2v9h-2V9ZM8 9h2v9H8V9Z"
+        fill="currentColor"
+      />
     </svg>
   )
 }

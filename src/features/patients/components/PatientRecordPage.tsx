@@ -178,6 +178,7 @@ export function PatientRecordPage({
           <div className="patient-summary-card__actions">
             <button
               className="button button--ghost"
+              disabled={isSavingPatient}
               onClick={() => setFormValues(toFormValues(patient))}
               type="button"
             >

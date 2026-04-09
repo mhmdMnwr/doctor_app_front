@@ -96,6 +96,7 @@ export function CertificatsSection({
   const [patientsDirectory, setPatientsDirectory] = useState<Record<string, Patient>>({})
   const [listPage, setListPage] = useState<number>(PAGINATION.DEFAULT_PAGE)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [createErrorMessage, setCreateErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const getCurrentRange = () => {
@@ -186,11 +187,13 @@ export function CertificatsSection({
     }
 
     setCreatePatient(null)
+    setCreateErrorMessage(null)
     setIsSelectorOpen(true)
   }
 
   const closeCreateModal = () => {
     setCommentaire('')
+    setCreateErrorMessage(null)
     setIsCreateModalOpen(false)
   }
 
@@ -232,12 +235,12 @@ export function CertificatsSection({
     event.preventDefault()
 
     if (!createPatient) {
-      setErrorMessage('Selectionnez un patient avant de creer un certificat.')
+      setCreateErrorMessage('Choisissez d abord un patient.')
       return
     }
 
     setIsCreating(true)
-    setErrorMessage(null)
+    setCreateErrorMessage(null)
     setSuccessMessage(null)
 
     try {
@@ -253,7 +256,7 @@ export function CertificatsSection({
       const { fromDate, endDate } = getCurrentRange()
       await loadCertificates(fromDate, endDate)
     } catch (error) {
-      setErrorMessage(getErrorMessage(error, 'La creation du certificat a echoue.'))
+      setCreateErrorMessage(getErrorMessage(error, 'Nous n avons pas pu creer le certificat. Reessayez.'))
     } finally {
       setIsCreating(false)
     }
@@ -474,6 +477,7 @@ export function CertificatsSection({
         onClose={() => setIsSelectorOpen(false)}
         onPatientSelected={(patient) => {
           setCreatePatient(patient)
+          setCreateErrorMessage(null)
           setIsSelectorOpen(false)
           setIsCreateModalOpen(true)
         }}
@@ -499,6 +503,8 @@ export function CertificatsSection({
             )}
 
             <form className="editor-grid" onSubmit={handleCreate}>
+              {createErrorMessage && <p className="status status--error">{createErrorMessage}</p>}
+
               <textarea
                 onChange={(event) => setCommentaire(event.target.value)}
                 placeholder="Commentaire"

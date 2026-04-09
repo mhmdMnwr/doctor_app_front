@@ -93,6 +93,15 @@ const toMedicineRows = (medicines: Ordonnance['medicines']): MedicineFormRow[] =
   }))
 }
 
+const sanitizeCreateMedicineRows = (rows: MedicineFormRow[]): MedicineFormRow[] => {
+  return rows
+    .map((item) => ({
+      medicine: item.medicine.trim(),
+      dosage: item.dosage.trim(),
+    }))
+    .filter((item) => item.medicine)
+}
+
 const sanitizeMedicineRows = (rows: MedicineFormRow[]): MedicineFormRow[] => {
   return rows
     .map((item) => ({
@@ -128,6 +137,7 @@ export function OrdonnancesSection({
   const [patientsDirectory, setPatientsDirectory] = useState<Record<string, Patient>>({})
   const [listPage, setListPage] = useState<number>(PAGINATION.DEFAULT_PAGE)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [createErrorMessage, setCreateErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const getCurrentRange = () => {
@@ -218,12 +228,14 @@ export function OrdonnancesSection({
     }
 
     setCreatePatient(null)
+    setCreateErrorMessage(null)
     setIsSelectorOpen(true)
   }
 
   const closeCreateModal = () => {
     setDiagnostic('')
     setCreateMedicines([{ ...EMPTY_MEDICINE_ROW }])
+    setCreateErrorMessage(null)
     setIsCreateModalOpen(false)
   }
 
@@ -305,19 +317,14 @@ export function OrdonnancesSection({
     event.preventDefault()
 
     if (!createPatient) {
-      setErrorMessage('Selectionnez un patient avant de creer une ordonnance.')
+      setCreateErrorMessage('Choisissez d abord un patient.')
       return
     }
 
-    const medicines = sanitizeMedicineRows(createMedicines)
-
-    if (!medicines.length) {
-      setErrorMessage('Ajoutez au moins un medicament valide.')
-      return
-    }
+    const medicines = sanitizeCreateMedicineRows(createMedicines)
 
     setIsCreating(true)
-    setErrorMessage(null)
+    setCreateErrorMessage(null)
     setSuccessMessage(null)
 
     try {
@@ -335,7 +342,7 @@ export function OrdonnancesSection({
       const { fromDate, endDate } = getCurrentRange()
       await loadOrdonnances(fromDate, endDate)
     } catch (error) {
-      setErrorMessage(getErrorMessage(error, 'La creation de l ordonnance a echoue.'))
+      setCreateErrorMessage(getErrorMessage(error, 'Nous n avons pas pu creer l ordonnance. Reessayez.'))
     } finally {
       setIsCreating(false)
     }
@@ -566,6 +573,7 @@ export function OrdonnancesSection({
         onClose={() => setIsSelectorOpen(false)}
         onPatientSelected={(patient) => {
           setCreatePatient(patient)
+          setCreateErrorMessage(null)
           setIsSelectorOpen(false)
           setIsCreateModalOpen(true)
         }}
@@ -591,6 +599,8 @@ export function OrdonnancesSection({
             )}
 
             <form className="editor-grid" onSubmit={handleCreate}>
+              {createErrorMessage && <p className="status status--error">{createErrorMessage}</p>}
+
               <label className="form-label" htmlFor="ordonnanceDiagnostic">
                 <span>Diagnostic *</span>
                 <textarea
@@ -605,7 +615,7 @@ export function OrdonnancesSection({
 
               <section className="ordonnance-medicines">
                 <header className="ordonnance-medicines__header">
-                  <h3>Medicaments</h3>
+                  <h3>Medicaments (optionnel)</h3>
                   <button className="button button--ghost ordonnance-medicines__add" onClick={addCreateMedicineRow} type="button">
                     +
                     Ajouter

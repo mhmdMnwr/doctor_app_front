@@ -38,6 +38,7 @@ export function PatientsSection({
   const [isLoading, setIsLoading] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [createErrorMessage, setCreateErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -98,11 +99,13 @@ export function PatientsSection({
 
   const openAddModal = () => {
     setCreateFormValues(EMPTY_FORM_VALUES)
+    setCreateErrorMessage(null)
     setIsAddModalOpen(true)
   }
 
   const closeAddModal = () => {
     setCreateFormValues(EMPTY_FORM_VALUES)
+    setCreateErrorMessage(null)
     setIsAddModalOpen(false)
   }
 
@@ -122,7 +125,7 @@ export function PatientsSection({
     }
 
     setIsCreating(true)
-    setErrorMessage(null)
+    setCreateErrorMessage(null)
     setSuccessMessage(null)
 
     try {
@@ -134,7 +137,7 @@ export function PatientsSection({
       onPatientSelected(createdPatient)
       onOpenPatientRecords(createdPatient)
     } catch (error) {
-      setErrorMessage(getErrorMessage(error, 'La creation du patient a echoue.'))
+      setCreateErrorMessage(getErrorMessage(error, 'Nous n avons pas pu creer le patient. Verifiez les informations puis reessayez.'))
     } finally {
       setIsCreating(false)
     }
@@ -302,6 +305,8 @@ export function PatientsSection({
             <p className="modal-card__description">Renseignez les informations du patient pour continuer.</p>
 
             <form className="editor-grid" onSubmit={handleCreatePatient}>
+              {createErrorMessage && <p className="status status--error">{createErrorMessage}</p>}
+
               <input
                 onChange={(event) => updateField('name', event.target.value)}
                 placeholder="Nom"

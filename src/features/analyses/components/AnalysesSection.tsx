@@ -103,6 +103,7 @@ export function AnalysesSection({
   const [patientsDirectory, setPatientsDirectory] = useState<Record<string, Patient>>({})
   const [listPage, setListPage] = useState<number>(PAGINATION.DEFAULT_PAGE)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [createErrorMessage, setCreateErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const getCurrentRange = () => {
@@ -194,11 +195,13 @@ export function AnalysesSection({
     }
 
     setCreatePatient(null)
+    setCreateErrorMessage(null)
     setIsSelectorOpen(true)
   }
 
   const closeCreateModal = () => {
     setCreateNamesInput('')
+    setCreateErrorMessage(null)
     setIsCreateModalOpen(false)
   }
 
@@ -240,19 +243,19 @@ export function AnalysesSection({
     event.preventDefault()
 
     if (!createPatient) {
-      setErrorMessage('Selectionnez un patient avant de creer une analyse.')
+      setCreateErrorMessage('Choisissez d abord un patient.')
       return
     }
 
     const analyzeNames = parseAnalyzeNames(createNamesInput)
 
     if (!analyzeNames.length) {
-      setErrorMessage('Ajoutez au moins un nom d analyse.')
+      setCreateErrorMessage('Entrez au moins un nom d analyse.')
       return
     }
 
     setIsCreating(true)
-    setErrorMessage(null)
+    setCreateErrorMessage(null)
     setSuccessMessage(null)
 
     try {
@@ -268,7 +271,7 @@ export function AnalysesSection({
       const { fromDate, endDate } = getCurrentRange()
       await loadAnalyses(fromDate, endDate)
     } catch (error) {
-      setErrorMessage(getErrorMessage(error, 'La creation de l analyse a echoue.'))
+      setCreateErrorMessage(getErrorMessage(error, 'Nous n avons pas pu creer l analyse. Reessayez.'))
     } finally {
       setIsCreating(false)
     }
@@ -498,6 +501,7 @@ export function AnalysesSection({
         onClose={() => setIsSelectorOpen(false)}
         onPatientSelected={(patient) => {
           setCreatePatient(patient)
+          setCreateErrorMessage(null)
           setIsSelectorOpen(false)
           setIsCreateModalOpen(true)
         }}
@@ -523,6 +527,8 @@ export function AnalysesSection({
             )}
 
             <form className="editor-grid" onSubmit={handleCreate}>
+              {createErrorMessage && <p className="status status--error">{createErrorMessage}</p>}
+
               <textarea
                 onChange={(event) => setCreateNamesInput(event.target.value)}
                 placeholder="Noms d analyses separes par des virgules"

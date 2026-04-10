@@ -54,6 +54,11 @@ interface AdminDashboardPageProps {
   onSessionEnded: (message: string) => void
 }
 
+const ENABLE_OPTIONAL_SECTIONS = {
+  drugs: false,
+  chatbot: false,
+} as const
+
 const EMPTY_PROFILE_FORM: ProfileFormValues = {
   username: '',
   phoneNumber: '',
@@ -66,13 +71,25 @@ const EMPTY_PASSWORD_FORM: PasswordFormValues = {
   confirmPassword: '',
 }
 
+const DRUGS_NAV_ITEM: PortalNavItem = {
+  key: 'recherche-medicaments',
+  label: 'Recherche medicaments',
+  icon: SearchDrugIcon,
+}
+
+const CHATBOT_NAV_ITEM: PortalNavItem = {
+  key: 'chatbot',
+  label: 'Chatbot',
+  icon: ChatbotIcon,
+}
+
 const NAV_ITEMS: PortalNavItem[] = [
   { key: 'patients', label: 'Patients', icon: PatientsIcon },
   { key: 'ordonnances', label: 'Ordonnances', icon: PrescriptionIcon },
   { key: 'certificats', label: 'Certificats', icon: CalendarIcon },
   { key: 'analyses', label: 'Analyses', icon: FlaskIcon },
-  { key: 'recherche-medicaments', label: 'Recherche medicaments', icon: SearchDrugIcon },
-  { key: 'chatbot', label: 'Chatbot', icon: ChatbotIcon },
+  ...(ENABLE_OPTIONAL_SECTIONS.drugs ? [DRUGS_NAV_ITEM] : []),
+  ...(ENABLE_OPTIONAL_SECTIONS.chatbot ? [CHATBOT_NAV_ITEM] : []),
   { key: 'excel', label: 'Excel', icon: SheetIcon },
   { key: 'settings', label: 'Parametres', icon: GearIcon, isBottom: true },
 ]
@@ -409,11 +426,11 @@ export function AdminDashboardPage({ onSessionEnded }: AdminDashboardPageProps) 
       return <AnalysesSection doctorInfo={doctorPrintInfo} />
     }
 
-    if (activeSection === 'recherche-medicaments') {
+    if (ENABLE_OPTIONAL_SECTIONS.drugs && activeSection === 'recherche-medicaments') {
       return <DrugExplorerSection />
     }
 
-    if (activeSection === 'chatbot') {
+    if (ENABLE_OPTIONAL_SECTIONS.chatbot && activeSection === 'chatbot') {
       return <ChatbotSection />
     }
 
@@ -482,7 +499,9 @@ export function AdminDashboardPage({ onSessionEnded }: AdminDashboardPageProps) 
         <MenuIcon />
       </button>
 
-      <section className={`portal-content ${activeSection === 'chatbot' ? 'portal-content--chat' : ''}`}>
+      <section
+        className={`portal-content ${ENABLE_OPTIONAL_SECTIONS.chatbot && activeSection === 'chatbot' ? 'portal-content--chat' : ''}`}
+      >
         {renderActiveSection()}
       </section>
 

@@ -11,6 +11,7 @@ import { AnalysesSection } from '../../features/analyses/components/AnalysesSect
 import { authApi } from '../../features/auth/api/authApi'
 import { ChatbotSection } from '../../features/chatbot/components/ChatbotSection'
 import { CertificatsSection } from '../../features/certificats/components/CertificatsSection'
+import { DrugExplorerSection } from '../../features/drugs/components/DrugExplorerSection'
 import { ExcelExportSection } from '../../features/excel/components/ExcelExportSection'
 import { OrdonnancesSection } from '../../features/ordonnances/components/OrdonnancesSection'
 import { PatientsSection } from '../../features/patients/components/PatientsSection.tsx'
@@ -25,6 +26,7 @@ type PortalSection =
   | 'ordonnances'
   | 'certificats'
   | 'analyses'
+  | 'recherche-medicaments'
   | 'chatbot'
   | 'excel'
   | 'settings'
@@ -69,6 +71,7 @@ const NAV_ITEMS: PortalNavItem[] = [
   { key: 'ordonnances', label: 'Ordonnances', icon: PrescriptionIcon },
   { key: 'certificats', label: 'Certificats', icon: CalendarIcon },
   { key: 'analyses', label: 'Analyses', icon: FlaskIcon },
+  { key: 'recherche-medicaments', label: 'Recherche medicaments', icon: SearchDrugIcon },
   { key: 'chatbot', label: 'Chatbot', icon: ChatbotIcon },
   { key: 'excel', label: 'Excel', icon: SheetIcon },
   { key: 'settings', label: 'Parametres', icon: GearIcon, isBottom: true },
@@ -406,6 +409,10 @@ export function AdminDashboardPage({ onSessionEnded }: AdminDashboardPageProps) 
       return <AnalysesSection doctorInfo={doctorPrintInfo} />
     }
 
+    if (activeSection === 'recherche-medicaments') {
+      return <DrugExplorerSection />
+    }
+
     if (activeSection === 'chatbot') {
       return <ChatbotSection />
     }
@@ -604,6 +611,18 @@ function FlaskIcon() {
         d="M9 2h6v2h-1v5.2l4.9 8.4A2.4 2.4 0 0 1 16.82 21H7.18a2.4 2.4 0 0 1-2.08-3.4L10 9.2V4H9Zm2.3 8L7.2 17h9.6l-4.1-7Z"
         fill="currentColor"
       />
+    </svg>
+  )
+}
+
+function SearchDrugIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path
+        d="M11 4a7 7 0 1 1-4.95 11.95A7 7 0 0 1 11 4Zm0-2a9 9 0 1 0 5.93 15.77l4.65 4.65 1.42-1.42-4.65-4.65A9 9 0 0 0 11 2Z"
+        fill="currentColor"
+      />
+      <path d="M10 7h2v3h3v2h-3v3h-2v-3H7v-2h3Z" fill="currentColor" />
     </svg>
   )
 }

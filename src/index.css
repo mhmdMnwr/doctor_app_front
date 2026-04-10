@@ -1082,6 +1082,80 @@ textarea {
   font-size: 1.25rem;
 }
 
+.drug-toolbar__search {
+  display: grid;
+  gap: 6px;
+}
+
+.drug-toolbar__search span {
+  color: #17294a;
+  font-weight: 700;
+}
+
+.drug-autocomplete__feedback {
+  display: block;
+  margin-top: 5px;
+  color: #5a6f90;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.drug-details-card {
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.drug-details-card h2 {
+  font-size: 1.25rem;
+}
+
+.drug-details-card__identity {
+  display: grid;
+  gap: 4px;
+}
+
+.drug-details-card__identity h3 {
+  margin: 0;
+  color: #17294a;
+  font: 700 1.28rem/1.2 var(--font-heading);
+}
+
+.drug-details-card__identity p {
+  margin: 0;
+  color: #445c82;
+  font-weight: 700;
+}
+
+.drug-details-card__grid {
+  display: grid;
+  gap: 10px;
+}
+
+.drug-details-card__block {
+  border: 1px solid #dbe4ef;
+  border-radius: 10px;
+  background: #f8fafd;
+  padding: 11px 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.drug-details-card__block h4 {
+  margin: 0;
+  color: #24334d;
+  font: 700 1.02rem/1.2 var(--font-heading);
+}
+
+.drug-details-card__block p {
+  margin: 0;
+  color: #4e6486;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
 .date-search-form--excel {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }

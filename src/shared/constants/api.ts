@@ -29,6 +29,11 @@ export const API_ROUTES = {
     BASE: '/analyzes',
     BY_DATE: '/analyzes/by-date',
   },
+  DRUGS: {
+    BASE: '/drugs',
+    SEARCH: '/drugs/search',
+    RESOLVE: '/drugs/resolve',
+  },
   CHATBOT: {
     MESSAGE: '/chatbot/message',
   },

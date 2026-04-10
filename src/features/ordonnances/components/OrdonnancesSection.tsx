@@ -4,6 +4,7 @@ import type { FormEvent } from 'react'
 import { PAGINATION } from '../../../shared/constants/pagination'
 import { printMedicalDocument } from '../../../shared/utils/medicalPrint'
 import type { DoctorPrintInfo } from '../../../shared/utils/medicalPrint'
+import { DrugNameAutocompleteInput } from '../../drugs/components/DrugNameAutocompleteInput'
 import { PatientSelectorModal } from '../../patients/components/PatientSelectorModal'
 import { patientsApi } from '../../patients/api/patientsApi'
 import type { Patient } from '../../patients/types/patients.types'
@@ -228,6 +229,7 @@ export function OrdonnancesSection({
     }
 
     setCreatePatient(null)
+    setCreateMedicines([{ ...EMPTY_MEDICINE_ROW }])
     setCreateErrorMessage(null)
     setIsSelectorOpen(true)
   }
@@ -622,16 +624,17 @@ export function OrdonnancesSection({
                   </button>
                 </header>
 
+                <p className="muted-text">Tapez un nom pour voir les suggestions. Vous pouvez aussi saisir un autre nom librement.</p>
+
                 <div className="ordonnance-medicines__list">
                   {createMedicines.map((item, index) => (
                     <div className="ordonnance-medicine-row" key={`create-medicine-row-${index}`}>
                       <label htmlFor={`create-medicine-name-${index}`}>
                         <span>Nom du medicament</span>
-                        <input
-                          id={`create-medicine-name-${index}`}
-                          onChange={(event) => updateCreateMedicineRow(index, 'medicine', event.target.value)}
+                        <DrugNameAutocompleteInput
+                          inputId={`create-medicine-name-${index}`}
+                          onValueChange={(nextValue) => updateCreateMedicineRow(index, 'medicine', nextValue)}
                           placeholder="Ex: Amoxicilline"
-                          type="text"
                           value={item.medicine}
                         />
                       </label>
